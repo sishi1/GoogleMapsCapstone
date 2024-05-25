@@ -13,6 +13,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -27,7 +28,8 @@ fun GoogleMaps(
 
     val mapProperties =
         MapProperties(
-            isMyLocationEnabled = state.lastKnownLocation != null
+            isMyLocationEnabled = state.lastKnownLocation != null,
+            mapType = MapType.TERRAIN
         )
 
     val cameraPositionState = rememberCameraPositionState()
