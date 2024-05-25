@@ -53,7 +53,7 @@ fun SearchBar(
                 items.add(text)
             }
             active = false
-            onSearch(text) // pass the search query to the parent composable
+            onSearch(text) // Pass the search query to the parent composable
         },
         active = active,
         onActiveChange = {
@@ -90,6 +90,11 @@ fun SearchBar(
         items.forEach {
             Row(modifier = Modifier.padding(all = 14.dp)) {
                 Box(modifier = Modifier
+                    .clickable {
+                        text = it
+                        active = false
+                        onSearch(text)
+                    }
                     .fillMaxWidth()) {
                     Icon(
                         modifier = Modifier
