@@ -10,9 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
 
@@ -51,11 +54,18 @@ class MainActivity : ComponentActivity() {
         askLocationPermission()
 
         setContent {
+            val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
+
             GoogleMaps(
-                state = viewModel.state.value
+                state = viewModel.state.value,
+                searchedLocation = searchedLocation.value
             )
 
-            SearchBar()
+            SearchBar(onSearch = { locationName ->
+                geocodeLocation(this, locationName) { location ->
+                    searchedLocation.value = location
+                }
+            })
         }
     }
 }
