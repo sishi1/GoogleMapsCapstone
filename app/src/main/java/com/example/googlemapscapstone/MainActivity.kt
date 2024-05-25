@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
             GoogleMaps(
                 state = viewModel.state.value
             )
+
+            SearchBar()
         }
     }
 }
