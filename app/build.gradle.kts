@@ -64,8 +64,8 @@ dependencies {
     implementation ("com.google.maps.android:maps-compose:4.4.1")
 
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt ("com.google.dagger:hilt-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:2.42")
+    kapt ("com.google.dagger:hilt-compiler:2.42")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
