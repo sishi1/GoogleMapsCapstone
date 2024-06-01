@@ -58,7 +58,10 @@ class MainActivity : ComponentActivity() {
 
             GoogleMaps(
                 state = viewModel.state.value,
-                searchedLocation = searchedLocation.value
+                searchedLocation = searchedLocation.value,
+                onGetCurrentLocation = {
+                    viewModel.getDeviceLocation(fusedLocationProviderClient)
+                }
             )
 
             SearchBar(onSearch = { locationName ->

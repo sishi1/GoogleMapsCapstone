@@ -42,8 +42,7 @@ fun SearchBar(
     }
     SearchBar(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 40.dp),
+            .fillMaxWidth(),
         query = text,
         onQueryChange = {
             text = it

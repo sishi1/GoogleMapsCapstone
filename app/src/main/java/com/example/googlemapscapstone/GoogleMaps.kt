@@ -1,6 +1,7 @@
 package com.example.googlemapscapstone
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -41,10 +46,12 @@ import com.google.maps.android.compose.*
 fun GoogleMaps(
     state: MapState,
     searchedLocation: LatLng?,
+    onGetCurrentLocation: () -> Unit,
 ) {
     var mapTypeToRemember by remember { mutableStateOf(MapType.TERRAIN) }
     val markerState = rememberMarkerState(position = LatLng(0.0, 0.0))
     var isMarkerVisible by remember { mutableStateOf(false) }
+    var currentLocationClicked by remember { mutableStateOf(false) }
 
     val mapProperties =
         MapProperties(
@@ -53,14 +60,26 @@ fun GoogleMaps(
         )
 
     val cameraPositionState = rememberCameraPositionState()
+    val animationDuration = 2000
 
     LaunchedEffect(searchedLocation) {
         searchedLocation?.let {
             markerState.position = it
             isMarkerVisible = true
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(it, 15f)
-            val animationDuration = 2000
             cameraPositionState.animate(cameraUpdate, animationDuration)
+        }
+    }
+
+    state.lastKnownLocation?.let { location ->
+        val latLng = LatLng(location.latitude, location.longitude)
+        if (currentLocationClicked) {
+            LaunchedEffect(latLng) {
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
+                cameraPositionState.animate(cameraUpdate, 2000)
+
+                currentLocationClicked = false // Reset the flag after animating
+            }
         }
     }
 
@@ -87,6 +106,24 @@ fun GoogleMaps(
                 )
             }
         }
+
+        FloatingActionButton(
+            onClick = {
+                isMarkerVisible = false
+                currentLocationClicked = true
+                onGetCurrentLocation()
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
+                .offset(y = (-90).dp)
+                .offset(x = (12).dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.MyLocation,
+                contentDescription = "My Location"
+            )
+        }
     }
 
     val sheetState = rememberModalBottomSheetState()
@@ -94,17 +131,22 @@ fun GoogleMaps(
         mutableStateOf(false)
     }
 
-    Box(
-        Modifier
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
+            .fillMaxHeight(0.5f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
+        Spacer(
+            modifier = Modifier.height((70).dp)
+        )
         FloatingActionButton(
             onClick =
             { isSheetOpen = true },
             Modifier
                 .size(40.dp)
-                .align(Alignment.CenterEnd)
+                .align(Alignment.End)
                 .padding(end = 10.dp)
                 .background(Color.Transparent),
             containerColor = Color.Transparent,
@@ -133,16 +175,35 @@ fun GoogleMaps(
 @Composable
 fun SheetContent(onMapTypeChange: (MapType) -> Unit) {
     Spacer(modifier = Modifier.size(40.dp))
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row {
-            MapTypeButton(MapType.NORMAL, onMapTypeChange, R.drawable.ic_launcher_foreground, "Normal")
-            MapTypeButton(MapType.HYBRID, onMapTypeChange, R.drawable.ic_launcher_foreground, "Hybrid")
-            MapTypeButton(MapType.SATELLITE, onMapTypeChange, R.drawable.ic_launcher_foreground, "Satellite")
-            MapTypeButton(MapType.TERRAIN, onMapTypeChange, R.drawable.ic_launcher_foreground, "Terrain")
+            MapTypeButton(
+                MapType.NORMAL,
+                onMapTypeChange,
+                R.drawable.ic_launcher_foreground,
+                "Normal"
+            )
+            MapTypeButton(
+                MapType.HYBRID,
+                onMapTypeChange,
+                R.drawable.ic_launcher_foreground,
+                "Hybrid"
+            )
+            MapTypeButton(
+                MapType.SATELLITE,
+                onMapTypeChange,
+                R.drawable.ic_launcher_foreground,
+                "Satellite"
+            )
+            MapTypeButton(
+                MapType.TERRAIN,
+                onMapTypeChange,
+                R.drawable.ic_launcher_foreground,
+                "Terrain"
+            )
         }
 
         Spacer(modifier = Modifier.size(40.dp))
@@ -150,7 +211,12 @@ fun SheetContent(onMapTypeChange: (MapType) -> Unit) {
 }
 
 @Composable
-fun MapTypeButton(mapType: MapType, onMapTypeChange: (MapType) -> Unit, iconResId: Int, label: String) {
+fun MapTypeButton(
+    mapType: MapType,
+    onMapTypeChange: (MapType) -> Unit,
+    iconResId: Int,
+    label: String
+) {
     ShowButton(
         mapType = mapType,
         onMapTypeChange = onMapTypeChange,
