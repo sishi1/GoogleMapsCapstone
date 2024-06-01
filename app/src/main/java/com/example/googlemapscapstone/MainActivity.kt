@@ -1,7 +1,5 @@
 package com.example.googlemapscapstone
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,14 +10,17 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
 
-    private val requestPermisisonLauncher = registerForActivityResult(
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private val viewModel: GoogleMapsViewModel by viewModels()
+    private lateinit var locationPermissionHelper: LocationPermissionHelper
+
+    private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { permissionIsGranted: Boolean ->
         if (permissionIsGranted) {
@@ -29,29 +30,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun askLocationPermission() = when {
-        ContextCompat.checkSelfPermission(
-            this, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-            this, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            viewModel.getDeviceLocation(fusedLocationProviderClient)
-        }
-
-        else -> {
-            requestPermisisonLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
-
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private val viewModel: GoogleMapsViewModel by viewModels()
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        askLocationPermission()
+        locationPermissionHelper = LocationPermissionHelper(this)
+
+        if (locationPermissionHelper.checkPermissions()) {
+            viewModel.getDeviceLocation(fusedLocationProviderClient)
+        } else {
+            locationPermissionHelper.requestPermissions(requestPermissionLauncher)
+        }
 
         setContent {
             val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
@@ -60,7 +50,11 @@ class MainActivity : ComponentActivity() {
                 state = viewModel.state.value,
                 searchedLocation = searchedLocation.value,
                 onGetCurrentLocation = {
-                    viewModel.getDeviceLocation(fusedLocationProviderClient)
+                    if (locationPermissionHelper.checkPermissions()) {
+                        viewModel.getDeviceLocation(fusedLocationProviderClient)
+                    } else {
+                        locationPermissionHelper.requestPermissions(requestPermissionLauncher)
+                    }
                 }
             )
 
