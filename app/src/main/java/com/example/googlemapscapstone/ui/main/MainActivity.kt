@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone
+package com.example.googlemapscapstone.ui.main
 
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +10,9 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.example.googlemapscapstone.utils.LocationPermissionHelper
+import com.example.googlemapscapstone.utils.geocodeLocation
+import com.example.googlemapscapstone.viewmodel.GoogleMapsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -24,7 +27,7 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { permissionIsGranted: Boolean ->
         if (permissionIsGranted) {
-            viewModel.getDeviceLocation(fusedLocationProviderClient)
+            getLocation()
         } else {
             Log.d("Permission", "Permission denied")
         }
@@ -37,11 +40,7 @@ class MainActivity : ComponentActivity() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         locationPermissionHelper = LocationPermissionHelper(this)
 
-        if (locationPermissionHelper.checkPermissions()) {
-            viewModel.getDeviceLocation(fusedLocationProviderClient)
-        } else {
-            locationPermissionHelper.requestPermissions(requestPermissionLauncher)
-        }
+        checkLocationPermission()
 
         setContent {
             val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
@@ -50,11 +49,7 @@ class MainActivity : ComponentActivity() {
                 state = viewModel.state.value,
                 searchedLocation = searchedLocation.value,
                 onGetCurrentLocation = {
-                    if (locationPermissionHelper.checkPermissions()) {
-                        viewModel.getDeviceLocation(fusedLocationProviderClient)
-                    } else {
-                        locationPermissionHelper.requestPermissions(requestPermissionLauncher)
-                    }
+                    getLocation()
                 }
             )
 
@@ -64,5 +59,17 @@ class MainActivity : ComponentActivity() {
                 }
             })
         }
+    }
+
+    private fun checkLocationPermission() {
+        if (locationPermissionHelper.checkPermissions()) {
+            getLocation()
+        } else {
+            locationPermissionHelper.requestPermissions(requestPermissionLauncher)
+        }
+    }
+
+    private fun getLocation() {
+        viewModel.getDeviceLocation(fusedLocationProviderClient)
     }
 }

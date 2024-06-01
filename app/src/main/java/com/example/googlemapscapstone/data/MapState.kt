@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone
+package com.example.googlemapscapstone.data
 
 import android.location.Location
 

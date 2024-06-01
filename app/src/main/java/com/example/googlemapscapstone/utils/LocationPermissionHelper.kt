@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone
+package com.example.googlemapscapstone.utils
 
 import android.Manifest
 import android.content.Context

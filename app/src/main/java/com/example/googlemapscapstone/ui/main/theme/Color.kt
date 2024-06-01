@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.theme
+package com.example.googlemapscapstone.ui.main.theme
 
 import androidx.compose.ui.graphics.Color
 

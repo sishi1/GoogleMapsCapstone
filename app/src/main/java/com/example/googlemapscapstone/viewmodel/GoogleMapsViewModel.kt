@@ -1,10 +1,11 @@
-package com.example.googlemapscapstone
+package com.example.googlemapscapstone.viewmodel
 
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.googlemapscapstone.data.MapState
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

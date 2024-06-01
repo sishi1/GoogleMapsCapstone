@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone
+package com.example.googlemapscapstone.ui.main
 
 import android.os.Build
 import androidx.annotation.RequiresApi
