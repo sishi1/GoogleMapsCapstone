@@ -8,7 +8,9 @@ fun showAlertDialog(
     title: String,
     message: String,
     positiveButtonText: String = "OK",
-    positiveButtonAction: (() -> Unit)? = null
+    positiveButtonAction: (() -> Unit)? = null,
+    negativeButtonText: String = "Cancel",
+    negativeButtonAction: (() -> Unit)? = null
 ) {
     AlertDialog.Builder(context).apply {
         setTitle(title)
@@ -16,6 +18,10 @@ fun showAlertDialog(
         setPositiveButton(positiveButtonText) { dialog, _ ->
             dialog.dismiss()
             positiveButtonAction?.invoke()
+        }
+        setNegativeButton(negativeButtonText) { dialog, _ ->
+            dialog.dismiss()
+            negativeButtonAction?.invoke()
         }
         create()
         show()

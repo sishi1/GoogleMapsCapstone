@@ -2,7 +2,6 @@ package com.example.googlemapscapstone.ui.main
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +11,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.example.googlemapscapstone.utils.LocationPermissionHelper
 import com.example.googlemapscapstone.utils.geocodeLocation
+import com.example.googlemapscapstone.utils.showRationaleDialog
+import com.example.googlemapscapstone.utils.showSettingsAlertDialog
+import com.example.googlemapscapstone.utils.showToast
 import com.example.googlemapscapstone.viewmodel.GoogleMapsViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -19,17 +21,22 @@ import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
 
+    private val permissionMessage = "Permission is required to use this feature."
+
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private val viewModel: GoogleMapsViewModel by viewModels()
-    private lateinit var locationPermissionHelper: LocationPermissionHelper
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { permissionIsGranted: Boolean ->
         if (permissionIsGranted) {
-            getLocation()
+            LocationPermissionHelper.getLocation(viewModel, fusedLocationProviderClient)
         } else {
-            Log.d("Permission", "Permission denied")
+            if (!LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                showSettingsAlertDialog(this)
+            } else {
+                showToast(this, permissionMessage)
+            }
         }
     }
 
@@ -38,9 +45,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        locationPermissionHelper = LocationPermissionHelper(this)
-
-        checkLocationPermission()
 
         setContent {
             val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
@@ -49,7 +53,17 @@ class MainActivity : ComponentActivity() {
                 state = viewModel.state.value,
                 searchedLocation = searchedLocation.value,
                 onGetCurrentLocation = {
-                    getLocation()
+                    if (LocationPermissionHelper.checkPermissions(this)) {
+                        LocationPermissionHelper.getLocation(viewModel, fusedLocationProviderClient)
+                    } else {
+                        if (LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                            showRationaleDialog(this) {
+                                LocationPermissionHelper.requestPermissions(requestPermissionLauncher)
+                            }
+                        } else {
+                            LocationPermissionHelper.requestPermissions(requestPermissionLauncher)
+                        }
+                    }
                 }
             )
 
@@ -59,17 +73,5 @@ class MainActivity : ComponentActivity() {
                 }
             })
         }
-    }
-
-    private fun checkLocationPermission() {
-        if (locationPermissionHelper.checkPermissions()) {
-            getLocation()
-        } else {
-            locationPermissionHelper.requestPermissions(requestPermissionLauncher)
-        }
-    }
-
-    private fun getLocation() {
-        viewModel.getDeviceLocation(fusedLocationProviderClient)
     }
 }
