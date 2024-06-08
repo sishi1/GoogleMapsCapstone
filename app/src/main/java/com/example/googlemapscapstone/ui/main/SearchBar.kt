@@ -3,6 +3,7 @@ package com.example.googlemapscapstone.ui.main
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,14 +24,16 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.pointerInput
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     onSearch: (String) -> Unit,
+    enabled: Boolean
 ) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
@@ -40,23 +43,34 @@ fun SearchBar(
             "Voorschoten"
         )
     }
-    SearchBar(
+    // Need the entire namespace otherwise it breaks the entire function
+    androidx.compose.material3.SearchBar(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .let {
+                if (!enabled) it.alpha(0.5f) else it
+            }
+            .then(
+                if (enabled) Modifier else Modifier.pointerInput(Unit) {
+                    detectTapGestures(onTap = {})
+                }
+            ),
         query = text,
         onQueryChange = {
-            text = it
+            if (enabled) text = it
         },
         onSearch = {
-            if (text != "" && !items.contains(text)) {
-                items.add(text)
+            if (enabled) {
+                if (text.isNotEmpty() && !items.contains(text)) {
+                    items.add(text)
+                }
+                active = false
+                onSearch(text) // Pass the search query to the parent composable
             }
-            active = false
-            onSearch(text) // Pass the search query to the parent composable
         },
         active = active,
         onActiveChange = {
-            active = it
+            if (enabled) active = it
         },
         leadingIcon = {
             Icon(
@@ -74,10 +88,12 @@ fun SearchBar(
             if (active) {
                 Icon(
                     modifier = Modifier.clickable {
-                        if (text.isNotEmpty()) {
-                            text = ""
-                        } else {
-                            active = false
+                        if (enabled) {
+                            if (text.isNotEmpty()) {
+                                text = ""
+                            } else {
+                                active = false
+                            }
                         }
                     },
                     imageVector = Icons.Default.Close,
@@ -90,9 +106,11 @@ fun SearchBar(
             Row(modifier = Modifier.padding(all = 14.dp)) {
                 Box(modifier = Modifier
                     .clickable {
-                        text = it
-                        active = false
-                        onSearch(text)
+                        if (enabled) {
+                            text = it
+                            active = false
+                            onSearch(text)
+                        }
                     }
                     .fillMaxWidth()) {
                     Icon(
