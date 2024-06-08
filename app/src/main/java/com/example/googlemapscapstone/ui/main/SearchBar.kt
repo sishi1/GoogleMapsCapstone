@@ -48,7 +48,7 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .let {
-                if (!enabled) it.alpha(0.5f) else it
+                if (!enabled) it.alpha(0f) else it
             }
             .then(
                 if (enabled) Modifier else Modifier.pointerInput(Unit) {
