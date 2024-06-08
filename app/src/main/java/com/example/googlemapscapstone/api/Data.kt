@@ -10,9 +10,11 @@ data class Route(
 )
 
 data class Leg(
-    val steps: List<Step>,
+    val start_address: String?,
+    val end_address: String?,
     val duration: Duration?,
-    val distance: Distance?
+    val distance: Distance?,
+    val steps: List<Step>
 )
 
 data class Step(
