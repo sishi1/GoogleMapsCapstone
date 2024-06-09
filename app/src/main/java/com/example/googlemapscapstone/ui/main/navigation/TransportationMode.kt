@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 enum class TransportationMode {
-    DRIVE, BICYCLE, WALK, TRANSIT
+    DRIVE, BICYCLING, WALKING, TRANSIT
 }
 @Composable
 fun TransportationModeSelector(selectedMode: TransportationMode, onModeSelected: (TransportationMode) -> Unit) {
@@ -38,13 +38,13 @@ fun TransportationModeSelector(selectedMode: TransportationMode, onModeSelected:
         )
         TransportationModeButton(
             icon = Icons.AutoMirrored.Filled.DirectionsWalk,
-            isSelected = selectedMode == TransportationMode.WALK,
-            onClick = { onModeSelected(TransportationMode.WALK) }
+            isSelected = selectedMode == TransportationMode.WALKING,
+            onClick = { onModeSelected(TransportationMode.WALKING) }
         )
         TransportationModeButton(
             icon = Icons.AutoMirrored.Filled.DirectionsBike,
-            isSelected = selectedMode == TransportationMode.BICYCLE,
-            onClick = { onModeSelected(TransportationMode.BICYCLE) }
+            isSelected = selectedMode == TransportationMode.BICYCLING,
+            onClick = { onModeSelected(TransportationMode.BICYCLING) }
         )
     }
 }
