@@ -2,8 +2,9 @@ package com.example.googlemapscapstone.ui.main
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,8 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,91 +43,95 @@ fun SearchBar(
             "Voorschoten"
         )
     }
-    // Need the entire namespace otherwise it breaks the entire function
-    androidx.compose.material3.SearchBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .let {
-                if (!enabled) it.alpha(0f) else it
-            }
-            .then(
-                if (enabled) Modifier else Modifier.pointerInput(Unit) {
-                    detectTapGestures(onTap = {})
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        // Use the entire namespace to avoid conflicts
+        androidx.compose.material3.SearchBar(
+            modifier = Modifier.fillMaxWidth(),
+            query = text,
+            onQueryChange = {
+                if (enabled) text = it
+            },
+            onSearch = {
+                if (enabled) {
+                    if (text.isNotEmpty() && !items.contains(text)) {
+                        items.add(text)
+                    }
+                    active = false
+                    onSearch(text) // Pass the search query to the parent composable
                 }
-            ),
-        query = text,
-        onQueryChange = {
-            if (enabled) text = it
-        },
-        onSearch = {
-            if (enabled) {
-                if (text.isNotEmpty() && !items.contains(text)) {
-                    items.add(text)
-                }
-                active = false
-                onSearch(text) // Pass the search query to the parent composable
-            }
-        },
-        active = active,
-        onActiveChange = {
-            if (enabled) active = it
-        },
-        leadingIcon = {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(24.dp)
-            )
-        },
-        placeholder = {
-            Text(text = "Search")
-        },
-        trailingIcon = {
-            if (active) {
+            },
+            active = active,
+            onActiveChange = {
+                if (enabled) active = it
+            },
+            leadingIcon = {
                 Icon(
-                    modifier = Modifier.clickable {
-                        if (enabled) {
-                            if (text.isNotEmpty()) {
-                                text = ""
-                            } else {
+                    Icons.Default.Search,
+                    contentDescription = "Search Icon",
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(24.dp)
+                )
+            },
+            placeholder = {
+                Text(text = "Search")
+            },
+            trailingIcon = {
+                if (active) {
+                    Icon(
+                        modifier = Modifier.clickable {
+                            if (enabled) {
+                                if (text.isNotEmpty()) {
+                                    text = ""
+                                } else {
+                                    active = false
+                                }
+                            }
+                        },
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close Icon"
+                    )
+                }
+            }
+        ) {
+            items.forEach {
+                Row(modifier = Modifier.padding(all = 14.dp)) {
+                    Box(modifier = Modifier
+                        .clickable {
+                            if (enabled) {
+                                text = it
                                 active = false
+                                onSearch(text)
                             }
                         }
-                    },
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close icon"
-                )
-            }
-        }
-    ) {
-        items.forEach {
-            Row(modifier = Modifier.padding(all = 14.dp)) {
-                Box(modifier = Modifier
-                    .clickable {
-                        if (enabled) {
-                            text = it
-                            active = false
-                            onSearch(text)
-                        }
+                        .fillMaxWidth()) {
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .align(Alignment.CenterStart),
+                            imageVector = Icons.Default.History,
+                            contentDescription = "History Icon"
+                        )
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .padding(start = 35.dp)
+                                .align(Alignment.CenterStart),
+                        )
                     }
-                    .fillMaxWidth()) {
-                    Icon(
-                        modifier = Modifier
-                            .padding(end = 10.dp)
-                            .align(Alignment.CenterStart),
-                        imageVector = Icons.Default.History,
-                        contentDescription = "History icon"
-                    )
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .padding(start = 35.dp)
-                            .align(Alignment.CenterStart),
-                    )
                 }
             }
+        }
+
+        // Overlay a transparent box to intercept clicks when the SearchBar is disabled
+        if (!enabled) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Transparent)
+                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+            )
         }
     }
 }
