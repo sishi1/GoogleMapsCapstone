@@ -151,9 +151,6 @@ fun NavigationUIContainer(
                 isSearchBarEnabled.value = true
                 isRouteButtonEnabled.value = true
                 myLocation.value = ""
-                destination.value = ""
-                searchedLocation.value = null
-                markerLocation.value = null
                 polylinePoints.value = emptyList()
             }
         )
