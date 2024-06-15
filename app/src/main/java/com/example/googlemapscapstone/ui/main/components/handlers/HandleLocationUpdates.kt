@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main.components
+package com.example.googlemapscapstone.ui.main.components.handlers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

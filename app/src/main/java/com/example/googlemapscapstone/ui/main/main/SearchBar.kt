@@ -1,5 +1,6 @@
-package com.example.googlemapscapstone.ui.main
+package com.example.googlemapscapstone.ui.main.main
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -27,12 +28,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
+import com.example.googlemapscapstone.api.fetchGeocode
+import com.google.android.gms.maps.model.LatLng
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
-    onSearch: (String) -> Unit,
+    context: Context,
+    onSearch: (LatLng?, String?) -> Unit,
     enabled: Boolean
 ) {
     var text by remember { mutableStateOf("") }
@@ -45,7 +49,6 @@ fun SearchBar(
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        // Use the entire namespace to avoid conflicts
         androidx.compose.material3.SearchBar(
             modifier = Modifier.fillMaxWidth(),
             query = text,
@@ -58,7 +61,11 @@ fun SearchBar(
                         items.add(text)
                     }
                     active = false
-                    onSearch(text) // Pass the search query to the parent composable
+                    fetchGeocode(context, text) { location, address ->
+                        if (location != null) {
+                            onSearch(location, address)
+                        }
+                    }
                 }
             },
             active = active,
@@ -102,7 +109,11 @@ fun SearchBar(
                             if (enabled) {
                                 text = it
                                 active = false
-                                onSearch(text)
+                                fetchGeocode(context, text) { location, address ->
+                                    if (location != null) {
+                                        onSearch(location, address)
+                                    }
+                                }
                             }
                         }
                         .fillMaxWidth()) {

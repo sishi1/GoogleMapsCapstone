@@ -13,4 +13,17 @@ interface ApiService {
         @Query("departure_time") departureTime: String,
         @Query("key") apiKey: String,
     ): Call<DirectionsResponse>
+
+    @GET("geocode/json")
+    fun getGeocode(
+        @Query("address") address: String,
+        @Query("key") apiKey: String,
+    ): Call<GeocodeResponse>
+
+    @GET("geocode/json")
+    fun getReverseGeocode(
+        @Query("latlng") latlng: String,
+        @Query("key") apiKey: String,
+    ): Call<GeocodeResponse>
+
 }

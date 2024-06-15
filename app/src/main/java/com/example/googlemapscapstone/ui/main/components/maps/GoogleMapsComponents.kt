@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main.components
+package com.example.googlemapscapstone.ui.main.components.maps
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -35,7 +35,7 @@ fun GoogleMapsComponents(
         if (polylinePoints.isNotEmpty()) {
             Polyline(
                 points = polylinePoints,
-                color = Color.Red,
+                color = Color.Blue,
                 width = 10f
             )
         }

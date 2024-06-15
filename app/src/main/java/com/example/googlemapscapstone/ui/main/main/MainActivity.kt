@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main
+package com.example.googlemapscapstone.ui.main.main
 
 import android.os.Build
 import android.os.Bundle
@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import com.example.googlemapscapstone.ui.main.navigation.NavigationUIContainer
 import com.example.googlemapscapstone.ui.main.navigation.TransportationMode
 import com.example.googlemapscapstone.utils.LocationPermissionHelper
-import com.example.googlemapscapstone.utils.geocodeLocation
 import com.example.googlemapscapstone.utils.showRationaleDialog
 import com.example.googlemapscapstone.utils.showSettingsAlertDialog
 import com.example.googlemapscapstone.utils.showToast
@@ -50,18 +49,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
+            val searchedLocationName = remember { mutableStateOf<String?>(null) }
             val isSearchBarEnabled = remember { mutableStateOf(true) }
             val isRouteButtonEnabled = remember { mutableStateOf(true) }
             val isNavigationUIVisible = remember { mutableStateOf(false) }
             val myLocation = remember { mutableStateOf("") }
+            val myLatLng = remember { mutableStateOf<LatLng?>(null) }
             val destination = remember { mutableStateOf("") }
             val selectedMode = remember { mutableStateOf(TransportationMode.DRIVE) }
             val markerLocation = remember { mutableStateOf<LatLng?>(null) }
             val polylinePoints = remember { mutableStateOf(listOf<LatLng>()) }
 
             GoogleMaps(
+                context = this,
                 state = viewModel.state.value,
-                searchedLocation = searchedLocation.value,
+                searchedLocation = searchedLocation,
+                markerLocation = markerLocation,
                 onGetCurrentLocation = {
                     if (LocationPermissionHelper.checkPermissions(this)) {
                         LocationPermissionHelper.getLocation(viewModel, fusedLocationProviderClient)
@@ -80,44 +83,38 @@ class MainActivity : ComponentActivity() {
                 onMarkerPlaced = { location ->
                     markerLocation.value = location
                 },
-                onNavigationButtonClicked = {
-                    val currentLocation = viewModel.state.value.lastKnownLocation
-                    if (currentLocation != null) {
-                        myLocation.value =
-                            "${currentLocation.latitude},${currentLocation.longitude}"
-                    }
-                    destination.value = when {
-                        searchedLocation.value != null -> "${searchedLocation.value!!.latitude},${searchedLocation.value!!.longitude}"
-                        markerLocation.value != null -> "${markerLocation.value!!.latitude},${markerLocation.value!!.longitude}"
-                        else -> ""
-                    }
-                    isRouteButtonEnabled.value = false
-                    isSearchBarEnabled.value = false
-                    isNavigationUIVisible.value = true
-                },
-                isRouteButtonEnabled = isRouteButtonEnabled.value,
+                isNavigationUIVisible = isNavigationUIVisible,
                 polylinePoints = polylinePoints.value,
                 onPolylinePointsUpdated = { points ->
                     polylinePoints.value = points
-                }
+                },
+                onClearDestination = {
+                    destination.value = ""
+                },
+                onUpdateDestination = { address ->
+                    destination.value = address
+                },
+                onUpdateMyLocation = { myLocation.value = it }
             )
 
             SearchBar(
-                onSearch = { locationName ->
-                    geocodeLocation(this, locationName) { location ->
-                        searchedLocation.value = location
-                    }
+                context = this,
+                onSearch = { location, address ->
+                    searchedLocation.value = location
+                    searchedLocationName.value = address
+                    destination.value = address ?: ""
                 },
                 enabled = isSearchBarEnabled.value
             )
 
             if (isNavigationUIVisible.value) {
                 NavigationUIContainer(
-                    context =  this,
+                    context = this,
                     isNavigationUIVisible = isNavigationUIVisible,
                     isSearchBarEnabled = isSearchBarEnabled,
                     isRouteButtonEnabled = isRouteButtonEnabled,
                     myLocation = myLocation,
+                    myLatLng = myLatLng,
                     destination = destination,
                     selectedMode = selectedMode,
                     searchedLocation = searchedLocation,

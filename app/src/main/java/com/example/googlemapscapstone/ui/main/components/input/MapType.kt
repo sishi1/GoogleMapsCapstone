@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main.components
+package com.example.googlemapscapstone.ui.main.components.input
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

@@ -1,7 +1,6 @@
 package com.example.googlemapscapstone.api
 
 import android.content.Context
-import android.util.Log
 import com.example.googlemapscapstone.BuildConfig
 import com.example.googlemapscapstone.data.NavigationData
 import com.example.googlemapscapstone.utils.showAlertDialog
@@ -67,7 +66,6 @@ fun drawRoute(
                                 },
                                 routeInfo = routeInfo
                             )
-                            Log.d("PolylinePoints", travelMode)
                         }
                         if (navigationDetails != null) {
                             onRouteDrawn(polylinePoints, routeInfo, navigationDetails!!)

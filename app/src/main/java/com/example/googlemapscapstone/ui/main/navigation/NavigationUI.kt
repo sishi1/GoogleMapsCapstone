@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.googlemapscapstone.api.drawRoute
-import com.example.googlemapscapstone.ui.main.components.LocationInputField
+import com.example.googlemapscapstone.api.handleGeocodeInput
+import com.example.googlemapscapstone.ui.main.components.input.LocationInputField
+import com.example.googlemapscapstone.utils.showAlertDialog
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
@@ -42,13 +44,21 @@ fun NavigationUI(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Search Fields
-        LocationInputField(value = myLocation, onValueChange = onMyLocationChange, label = "My location", icon = Icons.Default.MyLocation)
+        LocationInputField(
+            value = myLocation,
+            onValueChange = onMyLocationChange,
+            label = "My location",
+            icon = Icons.Default.MyLocation
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        LocationInputField(value = destination, onValueChange = onDestinationChange, label = "Destination", icon = Icons.Default.LocationOn)
+        LocationInputField(
+            value = destination,
+            onValueChange = onDestinationChange,
+            label = "Destination",
+            icon = Icons.Default.LocationOn
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Transportation Mode Selector
         TransportationModeSelector(selectedMode) { mode ->
             onModeChange(mode)
         }
@@ -70,6 +80,7 @@ fun NavigationUI(
     }
 }
 
+
 @Composable
 fun NavigationUIContainer(
     context: Context,
@@ -77,6 +88,7 @@ fun NavigationUIContainer(
     isSearchBarEnabled: MutableState<Boolean>,
     isRouteButtonEnabled: MutableState<Boolean>,
     myLocation: MutableState<String>,
+    myLatLng: MutableState<LatLng?>,
     destination: MutableState<String>,
     selectedMode: MutableState<TransportationMode>,
     searchedLocation: MutableState<LatLng?>,
@@ -93,30 +105,53 @@ fun NavigationUIContainer(
             myLocation = myLocation.value,
             destination = destination.value,
             selectedMode = selectedMode.value,
-            onMyLocationChange = { myLocation.value = it },
+            onMyLocationChange = { location ->
+                myLocation.value = location
+            },
             onDestinationChange = { destination.value = it },
             onModeChange = { selectedMode.value = it },
             onRouteClick = {
-                drawRoute(
-                    context = context,
-                    currentLocation = LatLng(
-                        myLocation.value.split(",")[0].toDouble(),
-                        myLocation.value.split(",")[1].toDouble()
-                    ),
-                    searchedLocation = searchedLocation.value,
-                    markedLocation = markerLocation.value,
-                    travelMode = selectedMode.value.name.lowercase(),
-                    departureTime = "now",
-                    onRouteDrawn = { points, info, details ->
-                        polylinePoints.value = points
+                handleGeocodeInput(context, myLocation.value) { latLng, _ ->
+                    myLatLng.value = latLng
+
+                    if (myLatLng.value == null || destination.value.isEmpty()) {
+                        showAlertDialog(
+                            context = context,
+                            title = "Empty Locations",
+                            message = "Current or destination location is empty. Please try again."
+                        )
+                    } else {
+                        handleGeocodeInput(context, destination.value) { location, _ ->
+                            if (location != null) {
+                                markerLocation.value = location
+                                drawRoute(
+                                    context = context,
+                                    currentLocation = myLatLng.value,
+                                    searchedLocation = searchedLocation.value,
+                                    markedLocation = markerLocation.value,
+                                    travelMode = selectedMode.value.name.lowercase(),
+                                    departureTime = "now",
+                                    onRouteDrawn = { points, info, details ->
+                                        polylinePoints.value = points
+                                    }
+                                )
+                            } else {
+                                showAlertDialog(
+                                    context = context,
+                                    title = "Navigation Error",
+                                    message = "Failed to find the location for the destination: ${destination.value}"
+                                )
+                            }
+                        }
                     }
-                )
+                }
             },
             onClose = {
                 isNavigationUIVisible.value = false
                 isSearchBarEnabled.value = true
                 isRouteButtonEnabled.value = true
                 myLocation.value = ""
+                destination.value = ""
                 searchedLocation.value = null
                 markerLocation.value = null
                 polylinePoints.value = emptyList()

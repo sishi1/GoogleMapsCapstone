@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main.components
+package com.example.googlemapscapstone.ui.main.components.maps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.googlemapscapstone.R
+import com.example.googlemapscapstone.ui.main.components.input.SheetContent
 import com.google.maps.android.compose.MapType
 
 @OptIn(ExperimentalMaterial3Api::class)

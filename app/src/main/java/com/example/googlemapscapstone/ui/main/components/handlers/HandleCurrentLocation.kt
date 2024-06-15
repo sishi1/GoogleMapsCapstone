@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.ui.main.components
+package com.example.googlemapscapstone.ui.main.components.handlers
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +21,7 @@ fun HandleCurrentLocation(
             LaunchedEffect(latLng) {
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
                 cameraPositionState.animate(cameraUpdate, animationDuration)
-                setCurrentLocationClicked(false) // Reset the flag after animating
+                setCurrentLocationClicked(false)
             }
         }
     }
