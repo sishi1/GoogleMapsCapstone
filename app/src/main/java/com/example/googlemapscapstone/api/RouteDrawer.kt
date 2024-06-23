@@ -44,7 +44,7 @@ fun drawRoute(
         override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
             if (response.isSuccessful) {
                 val directionsResponse = response.body()
-                directionsResponse?.let {
+                directionsResponse?.let { it ->
                     if (it.routes.isNotEmpty()) {
                         val polylinePoints = mutableListOf<LatLng>()
                         var routeInfo = ""

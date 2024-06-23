@@ -20,7 +20,10 @@ enum class TransportationMode {
     DRIVE, BICYCLING, WALKING, TRANSIT
 }
 @Composable
-fun TransportationModeSelector(selectedMode: TransportationMode, onModeSelected: (TransportationMode) -> Unit) {
+fun TransportationModeSelector(
+    selectedMode: TransportationMode,
+    onModeSelected: (TransportationMode) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -50,7 +53,11 @@ fun TransportationModeSelector(selectedMode: TransportationMode, onModeSelected:
 }
 
 @Composable
-fun TransportationModeButton(icon: ImageVector, isSelected: Boolean, onClick: () -> Unit) {
+fun TransportationModeButton(
+    icon: ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
