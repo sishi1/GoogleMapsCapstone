@@ -1,5 +1,7 @@
 package com.example.googlemapscapstone.api
 
+import com.example.googlemapscapstone.data.DirectionsResponse
+import com.example.googlemapscapstone.data.GeocodeResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

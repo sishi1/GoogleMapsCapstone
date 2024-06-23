@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.api
+package com.example.googlemapscapstone.data
 
 // Data classes for parsing Directions API response
 data class DirectionsResponse(

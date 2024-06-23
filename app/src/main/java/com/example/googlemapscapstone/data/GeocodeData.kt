@@ -1,4 +1,4 @@
-package com.example.googlemapscapstone.api
+package com.example.googlemapscapstone.data
 
 data class GeocodeResponse(
     val results: List<Result>,

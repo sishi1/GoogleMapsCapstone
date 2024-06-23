@@ -2,6 +2,7 @@ package com.example.googlemapscapstone.api
 
 import android.content.Context
 import com.example.googlemapscapstone.BuildConfig
+import com.example.googlemapscapstone.data.GeocodeResponse
 import com.example.googlemapscapstone.utils.showAlertDialog
 import com.google.android.gms.maps.model.LatLng
 import retrofit2.Call
