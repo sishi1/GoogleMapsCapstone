@@ -3,9 +3,7 @@ package com.example.googlemapscapstone.ui.main.main
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.graphics.Color
 import com.example.googlemapscapstone.api.fetchGeocode
 import com.google.android.gms.maps.model.LatLng
 
@@ -37,7 +34,6 @@ import com.google.android.gms.maps.model.LatLng
 fun SearchBar(
     context: Context,
     onSearch: (LatLng?, String?) -> Unit,
-    enabled: Boolean
 ) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
@@ -53,24 +49,24 @@ fun SearchBar(
             modifier = Modifier.fillMaxWidth(),
             query = text,
             onQueryChange = {
-                if (enabled) text = it
+                text = it
             },
             onSearch = {
-                if (enabled) {
-                    if (text.isNotEmpty() && !items.contains(text)) {
-                        items.add(text)
-                    }
-                    active = false
-                    fetchGeocode(context, text) { location, address ->
-                        if (location != null) {
-                            onSearch(location, address)
-                        }
+
+                if (text.isNotEmpty() && !items.contains(text)) {
+                    items.add(text)
+                }
+                active = false
+                fetchGeocode(context, text) { location, address ->
+                    if (location != null) {
+                        onSearch(location, address)
+
                     }
                 }
             },
             active = active,
             onActiveChange = {
-                if (enabled) active = it
+                active = it
             },
             leadingIcon = {
                 Icon(
@@ -88,13 +84,12 @@ fun SearchBar(
                 if (active) {
                     Icon(
                         modifier = Modifier.clickable {
-                            if (enabled) {
-                                if (text.isNotEmpty()) {
-                                    text = ""
-                                } else {
-                                    active = false
-                                }
+                            if (text.isNotEmpty()) {
+                                text = ""
+                            } else {
+                                active = false
                             }
+
                         },
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close Icon"
@@ -106,14 +101,13 @@ fun SearchBar(
                 Row(modifier = Modifier.padding(all = 14.dp)) {
                     Box(modifier = Modifier
                         .clickable {
-                            if (enabled) {
-                                text = it
-                                active = false
-                                fetchGeocode(context, text) { location, address ->
-                                    if (location != null) {
-                                        onSearch(location, address)
-                                    }
+                            text = it
+                            active = false
+                            fetchGeocode(context, text) { location, address ->
+                                if (location != null) {
+                                    onSearch(location, address)
                                 }
+
                             }
                         }
                         .fillMaxWidth()) {
@@ -133,16 +127,6 @@ fun SearchBar(
                     }
                 }
             }
-        }
-
-        // Overlay a transparent box to intercept clicks when the SearchBar is disabled
-        if (!enabled) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.Transparent)
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
-            )
         }
     }
 }

@@ -50,7 +50,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val searchedLocation = remember { mutableStateOf<LatLng?>(null) }
             val searchedLocationName = remember { mutableStateOf<String?>(null) }
-            val isSearchBarEnabled = remember { mutableStateOf(true) }
             val isRouteButtonEnabled = remember { mutableStateOf(true) }
             val isNavigationUIVisible = remember { mutableStateOf(false) }
             val myLocation = remember { mutableStateOf("") }
@@ -104,14 +103,12 @@ class MainActivity : ComponentActivity() {
                     searchedLocationName.value = address
                     destination.value = address ?: ""
                 },
-                enabled = isSearchBarEnabled.value
             )
 
             if (isNavigationUIVisible.value) {
                 NavigationUIContainer(
                     context = this,
                     isNavigationUIVisible = isNavigationUIVisible,
-                    isSearchBarEnabled = isSearchBarEnabled,
                     isRouteButtonEnabled = isRouteButtonEnabled,
                     myLocation = myLocation,
                     myLatLng = myLatLng,

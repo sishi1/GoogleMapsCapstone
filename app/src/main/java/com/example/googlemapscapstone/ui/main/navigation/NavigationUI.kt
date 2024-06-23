@@ -85,7 +85,6 @@ fun NavigationUI(
 fun NavigationUIContainer(
     context: Context,
     isNavigationUIVisible: MutableState<Boolean>,
-    isSearchBarEnabled: MutableState<Boolean>,
     isRouteButtonEnabled: MutableState<Boolean>,
     myLocation: MutableState<String>,
     myLatLng: MutableState<LatLng?>,
@@ -148,7 +147,6 @@ fun NavigationUIContainer(
             },
             onClose = {
                 isNavigationUIVisible.value = false
-                isSearchBarEnabled.value = true
                 isRouteButtonEnabled.value = true
                 myLocation.value = ""
                 polylinePoints.value = emptyList()
