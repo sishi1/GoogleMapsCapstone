@@ -116,7 +116,12 @@ class MainActivity : ComponentActivity() {
                     selectedMode = selectedMode,
                     searchedLocation = searchedLocation,
                     markerLocation = markerLocation,
-                    polylinePoints = polylinePoints
+                    polylinePoints = polylinePoints,
+                    onSwitchLocations = {
+                        val temp = myLocation.value
+                        myLocation.value = destination.value
+                        destination.value = temp
+                    },
                 )
             }
         }
