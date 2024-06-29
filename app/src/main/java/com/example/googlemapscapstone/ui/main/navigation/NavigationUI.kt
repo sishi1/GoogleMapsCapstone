@@ -163,7 +163,7 @@ fun NavigationUIContainer(
                                     markedLocation = markerLocation.value,
                                     travelMode = selectedMode.value.name.lowercase(),
                                     departureTime = "now",
-                                    onRouteDrawn = { points, info, details ->
+                                    onRouteDrawn = { points ->
                                         polylinePoints.value = points
                                     }
                                 )

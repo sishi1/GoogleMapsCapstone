@@ -3,14 +3,12 @@ package com.example.googlemapscapstone.api
 import android.content.Context
 import com.example.googlemapscapstone.BuildConfig
 import com.example.googlemapscapstone.data.DirectionsResponse
-import com.example.googlemapscapstone.data.NavigationData
 import com.example.googlemapscapstone.utils.showAlertDialog
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.Locale
 
 fun drawRoute(
     context: Context,
@@ -19,7 +17,7 @@ fun drawRoute(
     markedLocation: LatLng?,
     travelMode: String,
     departureTime: String,
-    onRouteDrawn: (List<LatLng>, String, NavigationData) -> Unit
+    onRouteDrawn: (List<LatLng>) -> Unit
 ) {
     if (currentLocation == null || (markedLocation == null && searchedLocation == null)) {
         showAlertDialog(
@@ -45,38 +43,15 @@ fun drawRoute(
         override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
             if (response.isSuccessful) {
                 val directionsResponse = response.body()
-                directionsResponse?.let { it ->
+                directionsResponse?.let {
                     if (it.routes.isNotEmpty()) {
                         val polylinePoints = mutableListOf<LatLng>()
-                        var routeInfo = ""
-                        var navigationDetails: NavigationData? = null
                         it.routes.firstOrNull()?.legs?.forEach { leg ->
                             leg.steps.forEach { step ->
                                 polylinePoints.addAll(PolyUtil.decode(step.polyline.points))
                             }
-                            val duration = leg.duration?.text ?: ""
-                            val distance = leg.distance?.text ?: ""
-                            routeInfo = "$duration ($distance)"
-                            navigationDetails = NavigationData(
-                                startLocation = leg.start_address ?: "Unknown",
-                                endLocation = leg.end_address ?: "Unknown",
-                                travelMode = travelMode.replaceFirstChar {
-                                    if (it.isLowerCase()) it.titlecase(
-                                        Locale.ROOT
-                                    ) else it.toString()
-                                },
-                                routeInfo = routeInfo
-                            )
                         }
-                        if (navigationDetails != null) {
-                            onRouteDrawn(polylinePoints, routeInfo, navigationDetails!!)
-                        } else {
-                            showAlertDialog(
-                                context = context,
-                                title = "No Route Found",
-                                message = "No route is available for the specified locations. Please try again with different locations."
-                            )
-                        }
+                            onRouteDrawn(polylinePoints)
                     } else {
                         showAlertDialog(
                             context = context,
